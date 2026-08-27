@@ -4,15 +4,17 @@
 constexpr uint8_t BUTTON_PIN = 2;    // External 10k pulldown, button to +5V
 constexpr uint8_t FAN_PWM_PIN = 9;   // OC1A (D9) for 25 kHz PWM (PC fan standard)
 constexpr uint8_t EEPROM_ADDR = 0;
-constexpr uint8_t SPEED_STEPS = 5;   // N speeds (20%, 40%, 60%, 80%, 100%)
+constexpr uint8_t SPEED_STEPS = 5;   // N speeds; must divide 100 (e.g. 5 => 20..100%)
 constexpr unsigned long DEBOUNCE_MS = 40;
 
 constexpr uint16_t PWM_TOP = 639;    // 16 MHz / (1 * (1 + 639)) = 25 kHz
+static_assert(SPEED_STEPS > 0, "SPEED_STEPS must be > 0");
+static_assert(100 % SPEED_STEPS == 0, "SPEED_STEPS must divide 100 equally");
 
 uint8_t currentStep = 0;             // 0..SPEED_STEPS-1
 
-bool lastButtonReading = LOW;
-bool stableButtonState = LOW;
+uint8_t lastButtonReading = LOW;
+uint8_t stableButtonState = LOW;
 unsigned long lastDebounceTime = 0;
 
 void setupFanPwm25kHz() {
@@ -55,13 +57,13 @@ void setup() {
 }
 
 void loop() {
-  const bool reading = digitalRead(BUTTON_PIN);
+  const uint8_t reading = digitalRead(BUTTON_PIN);
 
   if (reading != lastButtonReading) {
     lastDebounceTime = millis();
   }
 
-  if ((millis() - lastDebounceTime) > DEBOUNCE_MS) {
+  if ((millis() - lastDebounceTime) >= DEBOUNCE_MS) {
     if (reading != stableButtonState) {
       stableButtonState = reading;
 
