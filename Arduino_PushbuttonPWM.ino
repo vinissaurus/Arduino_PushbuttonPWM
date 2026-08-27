@@ -32,7 +32,7 @@ void setupFanPwm25kHz() {
 }
 
 void applyCurrentStep() {
-  const uint8_t percent = ((static_cast<uint16_t>(currentStep) + 1U) * 100U) / SPEED_STEPS;
+  const uint16_t percent = ((static_cast<uint16_t>(currentStep) + 1U) * 100U) / SPEED_STEPS;
   const uint16_t compareValue = (static_cast<uint32_t>(PWM_TOP) * percent) / 100U;
   OCR1A = compareValue;
 }
